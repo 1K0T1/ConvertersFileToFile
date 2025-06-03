@@ -30,16 +30,16 @@ class VideoConverter(tk.Frame):
         
         self.audio_codec = {
             "MP4": ["aac", "libmp3lame", "ac3"],
-            "AVI": ["libmp3lame", "pcm_s16le"],
+            "AVI": ["pcm_s16le", "libmp3lame"],
             "MOV": ["aac", "pcm_s16le"],
             "MKV": ["libopus", "libvorbis", "aac"],
             "WebM": ["libopus", "libvorbis"],
-            "FLV": ["libmp3lame", "aac"], 
+            "FLV": ["aac", "libmp3lame"], 
             "OGV": ["libvorbis"],
-            "3GP": ["libopencore_amrnb", "aac"], 
+            "3GP": ["aac", "libopencore_amrnb"], 
             "MPEG": ["mp2", "libmp3lame"],
             "TS": ["aac", "ac3"], 
-            "MTS": ["pcm_s16le", "ac3"],
+            "MTS": ["aac", "pcm_s16le", "ac3"],
             "WMV": ["wmav2"], 
             "ASF": ["wmav2"],
             "F4V": ["aac"], 
@@ -52,20 +52,20 @@ class VideoConverter(tk.Frame):
         self.video_codec = {
             "MP4": ["libx264", "libx265", "libaom-av1"],
             "AVI": ["mpeg4", "mjpeg", "rawvideo"], 
-            "MOV": ["prores", "libx264", "libx265"],
+            "MOV": ["libx264", "prores", "libx265"],
             "MKV": ["libx264", "libx265", "libvpx", "libvpx-vp9", "libaom-av1"], 
-            "WebM": ["libvpx", "libvpx-vp9", "libaom-av1"],
+            "WebM": ["libvpx-vp9", "libvpx", "libaom-av1"],
             "FLV": ["flv", "libx264"], 
             "OGV": ["libtheora"],
             "3GP": ["h263", "libx264"], 
-            "MPEG": ["mpeg1video", "mpeg2video"],
+            "MPEG": ["mpeg2video", "mpeg1video"],
             "TS": ["libx264", "mpeg2video"], 
             "MTS": ["libx264"],
             "WMV": ["wmv2"],
             "ASF": ["wmv2", "mpeg4"],
             "F4V": ["libx264"],
             "RMVB": ["realvideo"],
-            "MXF": ["prores", "libx264", "mpeg2video"], 
+            "MXF": ["libx264", "prores", "mpeg2video"], 
             "AMV": ["amv"],
             "DVR-MS": ["mpeg2video"]
         }
@@ -124,7 +124,7 @@ class VideoConverter(tk.Frame):
                     
                     # Конвертируем в MP4
                     self.clip.write_videofile(f"{self.default_name}.{self.list_format.get().lower()}", codec=f"{self.list_video.get()}", audio_codec=f"{self.list_audio.get()}")
-                    log_error(self, f"Файл конвертирован в video.{self.list_format.get().lower()}")
+                    log_error(self, f"Файл конвертирован в {self.default_name}.{self.list_format.get().lower()}")
                 self.label_info.config(text="Можно конвертировать")
                 self.convert.config(command=convert_button)
             except:
@@ -141,7 +141,7 @@ class VideoConverter(tk.Frame):
         self.label_drop = tk.Label(self, text="Перетащи сюда файл", bg="#ffffff", width=40, height=10, relief="ridge")  #виджет с характеристиками
         self.label_drop.place(relx=0.4, rely=0.01, width=300, height=100)
         self.label_dropdown = tk.Label(self, text="Выберите формат и кодек файла:", font=("Helvetica", 14)) #виджет с текстом
-        self.label_dropdown.place(relx=0.18, rely=0.1 ,anchor="center")
+        self.label_dropdown.place(relx=0.2, rely=0.15 ,anchor="center")
         
         self.label_error = tk.Label(self, text="", font=("Helvetica", 14))
         self.label_error.place(relx=0.7, rely=0.6, anchor="center")
@@ -150,6 +150,10 @@ class VideoConverter(tk.Frame):
         self.label_info = tk.Label(self, text="Перетащите файл")
         self.label_info.place(relx=0.4, rely=0.3)
         
+        # рекомендация
+        self.label_recommendation = tk.Label(self, text="Если не знаете какой кодек ставить\nто рекомендуется ставить первый", font=("Helvetica", 12))
+        self.label_recommendation.place(relx=0.04, rely=0.02)
+        
         # кнопка конвертации
         self.convert = tk.Button(self, text="Конвертировать", command=not_convert)
         self.convert.place(relx=0.4, rely=0.22)
@@ -157,17 +161,17 @@ class VideoConverter(tk.Frame):
         #Форматы
         self.list_format = tk.StringVar(value=self.formats[0])
         self.dropdown1 = tk.OptionMenu(self, self.list_format, *self.formats)
-        self.dropdown1.place(relx=0.32, rely=0.16, anchor="center")
+        self.dropdown1.place(relx=0.3, rely=0.24, anchor="center")
+    
+        #список аудио кодеков
+        self.list_audio = tk.StringVar(value=self.choice_codec[0])
+        self.dropdown3 = tk.OptionMenu(self, self.list_audio, *self.choice_codec)
+        self.dropdown3.place(relx=0.15, rely=0.22, anchor="center") 
     
         #список видео кодеков
         self.list_video = tk.StringVar(value=self.choice_codec[0])
         self.dropdown2 = tk.OptionMenu(self, self.list_video, *self.choice_codec)
-        self.dropdown2.place(relx=0.13, rely=0.16, anchor="center")   
-        
-        #список аудио кодеков
-        self.list_audio = tk.StringVar(value=self.choice_codec[0])
-        self.dropdown3 = tk.OptionMenu(self, self.list_audio, *self.choice_codec)
-        self.dropdown3.place(relx=0.13, rely=0.2, anchor="center")    
+        self.dropdown2.place(relx=0.15, rely=0.27, anchor="center")      
         
         # Регистрируем виджет "label" как цель для Drag and Drop файлов (тип DND_FILES означает, что можно перетаскивать файлы)
         self.label_drop.drop_target_register(DND_FILES)

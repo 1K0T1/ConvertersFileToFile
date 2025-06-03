@@ -15,11 +15,11 @@ class Foundation(TkinterDnD.Tk): # класс как tk только для tkin
     def __init__(self):
         super().__init__()
         self.title("Конвертатор")
-        self.geometry("800x700")
+        self.geometry("900x550")
 
         container = tk.Frame(self)
         container.pack(fill="both", expand=True)
-        
+
         self.frames = {}
         # cоздаём объект каждого и добавляем его в словарь
         for F in (StartWindow, ImageToImage, SoundConverter, VideoConverter):

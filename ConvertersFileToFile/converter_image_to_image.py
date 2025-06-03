@@ -57,10 +57,10 @@ class ImageToImage(tk.Frame): #фрейм класс
         #функция работает если не перетащили файл
         def not_convert():
             self.label_info.config(text="Для начала перетащите файл")
-        
+
         #функция для виджета куда можно переташить файл
         def DandD(event): #функция работае тогда когда файл переташили
-            
+
             self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
             self.label_drop.config(text=f"Файл: {self.dropped_file}") # меняем text на путь к файлу
             self.img = Image.open(self.dropped_file)                  # отыкрываем файл

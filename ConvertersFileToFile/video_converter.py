@@ -75,6 +75,13 @@ class VideoConverter(tk.Frame):
         # вернутся назад
         tk.Button(self, text="Назад", command=lambda: controller.show_frame("StartWindow")).place(relx=0.9, rely=0.1 ,anchor="center")
         
+        self.default_name = 'video'
+        def button_click(): #если название не введено то 'image'
+            if self.entry.get() == '':
+                self.default_name = 'video'
+            else:
+                self.default_name = self.entry.get()
+        
         def not_convert():        #функция работает если не перетащили файл
             self.label_info.config(text="Для начала перетащите файл")
             
@@ -116,12 +123,20 @@ class VideoConverter(tk.Frame):
                     self.clip = VideoFileClip(fr"{self.dropped_file}")
                     
                     # Конвертируем в MP4
-                    self.clip.write_videofile(f"video.{self.list_format.get().lower()}", codec=f"{self.list_video.get()}", audio_codec=f"{self.list_audio.get()}")
+                    self.clip.write_videofile(f"{self.default_name}.{self.list_format.get().lower()}", codec=f"{self.list_video.get()}", audio_codec=f"{self.list_audio.get()}")
                     log_error(self, f"Файл конвертирован в video.{self.list_format.get().lower()}")
                 self.label_info.config(text="Можно конвертировать")
                 self.convert.config(command=convert_button)
             except:
                 log_error(self, "Не возможно конвертировать файл!")
+
+        self.but_name = tk.Button(self, text="сохранить название", command= button_click)
+        self.but_name.place(relx=0.2, rely=0.95,anchor="center", width=200, height=30)
+
+        self.entry = tk.Entry(self, font=("Helvetica", 14), cursor="xterm", justify='center') #поле для названия
+        self.entry.place(relx=0.6, rely=0.95,anchor="center", width=300, height=30)
+        self.label_name = tk.Label(self, text="Введи название для конвертированного файла:", font=("Helvetica", 14))
+        self.label_name.place(relx=0.6, rely=0.88,anchor="center")
 
         self.label_drop = tk.Label(self, text="Перетащи сюда файл", bg="#ffffff", width=40, height=10, relief="ridge")  #виджет с характеристиками
         self.label_drop.place(relx=0.4, rely=0.01, width=300, height=100)

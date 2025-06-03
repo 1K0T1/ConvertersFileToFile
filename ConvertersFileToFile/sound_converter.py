@@ -40,12 +40,12 @@ class SoundConverter(tk.Frame): #фрейм класс
         def not_convert():
             self.label_info.config(text="Для начала перетащите файл")
 
-        self.default_song = 'sound'
+        self.default_name = 'sound'
         def button_click(): #если название не введено то 'sound'
             if self.name_sound.get() == '':
-                self.default_song = 'sound'
+                self.default_name = 'sound'
             else:
-                self.default_song = self.name_sound.get()
+                self.default_name = self.name_sound.get()
 
         def DandD(event): #функция работае тогда когда файл переташили
             self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
@@ -54,7 +54,7 @@ class SoundConverter(tk.Frame): #фрейм класс
             self.input_file = f"{self.dropped_file}"
             try:
                 def convert_button():
-                    self.output_file = f"{self.default_song}.{self.list_format.get().lower()}"
+                    self.output_file = f"{self.default_name}.{self.list_format.get().lower()}"
                     # конвертируем
                     self.audio = AudioSegment.from_file(self.input_file)
                     self.audio.export(self.output_file, format=f"{self.list_format.get().lower()}")

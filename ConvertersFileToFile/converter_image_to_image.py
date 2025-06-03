@@ -38,8 +38,6 @@ class ImageToImage(tk.Frame): #фрейм класс
             "TGA": "RGBA",
             "IM": "RGB"
         }
-        
-        self.default_image = 'image'
 
         # вернутся назад
         tk.Button(self, text="Назад", command=lambda: controller.show_frame("StartWindow")).place(relx=0.9, rely=0.1 ,anchor="center")
@@ -48,12 +46,13 @@ class ImageToImage(tk.Frame): #фрейм класс
             self.label_error.config(text=text_log)
             #Убераем каждые 5 сек
             self.after(5000, lambda: self.label_error.config(text=""))
-
+        
+        self.default_name = 'image'
         def button_click(): #если название не введено то 'image'
             if self.entry.get() == '':
-                self.default_image = 'image'
+                self.default_name = 'image'
             else:
-                self.default_image = self.entry.get()
+                self.default_name = self.entry.get()
 
         #функция работает если не перетащили файл
         def not_convert():
@@ -72,8 +71,8 @@ class ImageToImage(tk.Frame): #фрейм класс
                         def convert_button():                    
                             self.img = self.img.convert(f"{value}")           # сохраняем в выбраный формат
                             # того или иного формата то меняем на её режим
-                            self.img.save(f"{self.default_image}.{self.list_format.get().lower()}")
-                            log_error(self, f"Файл конвертирован в {self.default_image}.{self.list_format.get().lower()}")
+                            self.img.save(f"{self.default_name}.{self.list_format.get().lower()}")
+                            log_error(self, f"Файл конвертирован в {self.default_name}.{self.list_format.get().lower()}")
                         self.label_info.config(text="Можно конвертировать")
                         self.convert.config(command=convert_button)
             except:

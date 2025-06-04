@@ -90,10 +90,7 @@ class VideoConverter(tk.Frame):
             #Убераем каждые 5 сек
             self.after(5000, lambda: self.label_error.config(text=""))
         
-        def DandD(event): #функция работае тогда когда файл переташили
-            self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
-            self.label_drop.config(text=f"Файл: {self.dropped_file}") # меняем text на путь к файлу
-            
+        def format_to_codec(value):
             for key, value in self.video_codec.items():
                 if key == self.list_format.get():
                     new_menu = value
@@ -117,6 +114,11 @@ class VideoConverter(tk.Frame):
                     self.list_audio.set(value[0])
                     print(value)
                     print(f"формат {key}") 
+        
+        def DandD(event): #функция работае тогда когда файл переташили
+            self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
+            self.label_drop.config(text=f"Файл: {self.dropped_file}") # меняем text на путь к файлу
+            
             try:
                 def convert_button():
                     # Загружаем видео файл
@@ -160,7 +162,7 @@ class VideoConverter(tk.Frame):
         
         #Форматы
         self.list_format = tk.StringVar(value=self.formats[0])
-        self.dropdown1 = tk.OptionMenu(self, self.list_format, *self.formats)
+        self.dropdown1 = tk.OptionMenu(self, self.list_format, *self.formats, command=format_to_codec)
         self.dropdown1.place(relx=0.3, rely=0.24, anchor="center")
     
         #список аудио кодеков

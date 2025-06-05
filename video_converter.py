@@ -3,7 +3,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD                                   
 from pydub import AudioSegment                                                               #модули и библиотеки
 from moviepy import VideoFileClip, concatenate_videoclips                                    #модули и библиотеки
 import imageio_ffmpeg as ffmpeg                                                              #модули и библиотеки
-import os                                                                                    #модули и библиотеки
+from pathlib import Path                                                                     #модули и библиотеки
 
 # Получаем путь к встроенному ffmpeg
 ffmpeg_path = ffmpeg.get_ffmpeg_exe()
@@ -70,17 +70,30 @@ class VideoConverter(tk.Frame):
             "DVR-MS": ["mpeg2video"]
         }
         
-        self.choice_codec = ["Для начала нужен формат"]
+        self.ban_symbols = r"\/:*?\"<>|\'"
+        
+        self.one_codec = ["aac", "libmp3lame", "ac3"]
+        self.two_codec = ["libx264", "libx265", "libaom-av1"]
         
         # вернутся назад
         tk.Button(self, text="Назад", command=lambda: controller.show_frame("StartWindow")).place(relx=0.9, rely=0.1 ,anchor="center")
         
-        self.default_name = 'video'
-        def button_click(): #если название не введено то 'image'
-            if self.entry.get() == '':
-                self.default_name = 'video'
-            else:
+        def button_click():
+            try:
                 self.default_name = self.entry.get()
+                if self.entry.get() == "":
+                    self.default_name = Path(self.dropped_file).stem # берем только название файла
+                for ban_symbol in self.ban_symbols:
+                    for symbol in self.default_name:
+                        if ban_symbol == symbol:
+                            self.default_name = Path(self.dropped_file).stem # берем только название файла
+                            self.label_error.config(text=r"Нельзя ставить запрещенные символы (\/:*?\"<>|\')")
+                            #Убераем каждые 5 сек
+                            self.after(5000, lambda: self.label_error.config(text=""))
+            except:
+                self.label_error.config(text="Для начала перетащите файл")
+                #Убераем каждые 5 сек
+                self.after(5000, lambda: self.label_error.config(text=""))
         
         def not_convert():        #функция работает если не перетащили файл
             self.label_info.config(text="Для начала перетащите файл")
@@ -118,19 +131,24 @@ class VideoConverter(tk.Frame):
         def DandD(event): #функция работае тогда когда файл переташили
             self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
             self.label_drop.config(text=f"Файл: {self.dropped_file}") # меняем text на путь к файлу
-            
             try:
+                if self.entry.get() == "":
+                    self.default_name = Path(self.dropped_file).stem
+            
                 def convert_button():
-                    # Загружаем видео файл
-                    self.clip = VideoFileClip(fr"{self.dropped_file}")
-                    
-                    # Конвертируем в MP4
-                    self.clip.write_videofile(f"{self.default_name}.{self.list_format.get().lower()}", codec=f"{self.list_video.get()}", audio_codec=f"{self.list_audio.get()}")
-                    log_error(self, f"Файл конвертирован в {self.default_name}.{self.list_format.get().lower()}")
+                    try:
+                        # Загружаем видео файл
+                        self.clip = VideoFileClip(fr"{self.dropped_file}")
+                        
+                        # Конвертируем в MP4
+                        self.clip.write_videofile(f"{self.default_name}.{self.list_format.get().lower()}", codec=f"{self.list_video.get()}", audio_codec=f"{self.list_audio.get()}")
+                        log_error(self, f"Файл конвертирован в {self.default_name}.{self.list_format.get().lower()}")
+                    except:
+                        log_error(self, "Не возможно конвертировать файл!\nФайл поврежден или не поддерживаемый формат")
                 self.label_info.config(text="Можно конвертировать")
                 self.convert.config(command=convert_button)
             except:
-                log_error(self, "Не возможно конвертировать файл!")
+                log_error(self, "Не возможно конвертировать файл!\nФайл поврежден или не поддерживаемый формат")
 
         self.but_name = tk.Button(self, text="сохранить название", command= button_click)
         self.but_name.place(relx=0.2, rely=0.95,anchor="center", width=200, height=30)
@@ -166,13 +184,13 @@ class VideoConverter(tk.Frame):
         self.dropdown1.place(relx=0.3, rely=0.24, anchor="center")
     
         #список аудио кодеков
-        self.list_audio = tk.StringVar(value=self.choice_codec[0])
-        self.dropdown3 = tk.OptionMenu(self, self.list_audio, *self.choice_codec)
+        self.list_audio = tk.StringVar(value=self.one_codec[0])
+        self.dropdown3 = tk.OptionMenu(self, self.list_audio, *self.one_codec)
         self.dropdown3.place(relx=0.15, rely=0.22, anchor="center") 
     
         #список видео кодеков
-        self.list_video = tk.StringVar(value=self.choice_codec[0])
-        self.dropdown2 = tk.OptionMenu(self, self.list_video, *self.choice_codec)
+        self.list_video = tk.StringVar(value=self.two_codec[0])
+        self.dropdown2 = tk.OptionMenu(self, self.list_video, *self.two_codec)
         self.dropdown2.place(relx=0.15, rely=0.27, anchor="center")      
         
         # Регистрируем виджет "label" как цель для Drag and Drop файлов (тип DND_FILES означает, что можно перетаскивать файлы)

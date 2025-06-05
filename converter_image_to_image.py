@@ -2,7 +2,7 @@ from PIL import Image, ImageFilter, ImageFont, ImageDraw, ImageEnhance, ImageOps
 import tkinter as tk                                                                         #модули и библиотеки
 from tkinter import ttk, filedialog                                                          #модули и библиотеки
 from tkinterdnd2 import DND_FILES, TkinterDnD                                                #модули и библиотеки
-import os                                                                                    #модули и библиотеки
+from pathlib import Path                                                                     #модули и библиотеки
 
 class ImageToImage(tk.Frame): #фрейм класс
     def __init__(self, parent, controller):
@@ -39,6 +39,8 @@ class ImageToImage(tk.Frame): #фрейм класс
             "IM": "RGB"
         }
 
+        self.ban_symbols = r"\/:*?\"<>|\'"
+        
         # вернутся назад
         tk.Button(self, text="Назад", command=lambda: controller.show_frame("StartWindow")).place(relx=0.9, rely=0.1 ,anchor="center")
 
@@ -46,14 +48,25 @@ class ImageToImage(tk.Frame): #фрейм класс
             self.label_error.config(text=text_log)
             #Убераем каждые 5 сек
             self.after(5000, lambda: self.label_error.config(text=""))
-        
-        self.default_name = 'image'
-        def button_click(): #если название не введено то 'image'
-            if self.entry.get() == '':
-                self.default_name = 'image'
-            else:
-                self.default_name = self.entry.get()
 
+        #если название не введено или есть запрещенный символ то название будет первоначальным
+        def button_click():
+            try:
+                self.default_name = self.entry.get()
+                if self.entry.get() == "":
+                    self.default_name = Path(self.dropped_file).stem # берем только название файла
+                for ban_symbol in self.ban_symbols:
+                    for symbol in self.default_name:
+                        if ban_symbol == symbol:
+                            self.default_name = Path(self.dropped_file).stem # берем только название файла
+                            self.label_error.config(text=r"Нельзя ставить запрещенные символы (\/:*?\"<>|\')")
+                            #Убераем каждые 5 сек
+                            self.after(5000, lambda: self.label_error.config(text=""))
+            except:
+                self.label_error.config(text="Для начала перетащите файл")
+                #Убераем каждые 5 сек
+                self.after(5000, lambda: self.label_error.config(text=""))
+                        
         #функция работает если не перетащили файл
         def not_convert():
             self.label_info.config(text="Для начала перетащите файл")
@@ -63,20 +76,26 @@ class ImageToImage(tk.Frame): #фрейм класс
 
             self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
             self.label_drop.config(text=f"Файл: {self.dropped_file}") # меняем text на путь к файлу
-            self.img = Image.open(self.dropped_file)                  # отыкрываем файл
-    
             try:
+                self.img = Image.open(self.dropped_file)                  # отыкрываем файл
+                
+                if self.entry.get() == "":
+                    self.default_name = Path(self.dropped_file).stem
+
                 for key, value in self.format_to_mode.items():       #перебераем форматы до нужного
                     if self.list_format.get() == key:
-                        def convert_button():                    
-                            self.img = self.img.convert(f"{value}")           # сохраняем в выбраный формат
-                            # того или иного формата то меняем на её режим
-                            self.img.save(f"{self.default_name}.{self.list_format.get().lower()}")
-                            log_error(self, f"Файл конвертирован в {self.default_name}.{self.list_format.get().lower()}")
+                        def convert_button():
+                            try:
+                                self.img = self.img.convert(f"{value}")           # сохраняем в выбраный формат
+                                # того или иного формата то меняем на её режим
+                                self.img.save(f"{self.default_name}.{self.list_format.get().lower()}")
+                                log_error(self, f"Файл конвертирован в {self.default_name}.{self.list_format.get().lower()}")
+                            except:
+                                log_error(self, "Не возможно конвертировать файл!\nФайл поврежден или не поддерживаемый формат")
                         self.label_info.config(text="Можно конвертировать")
                         self.convert.config(command=convert_button)
             except:
-                log_error(self, "Не возможно конвертировать файл!")
+                log_error(self, "Не возможно конвертировать файл!\nФайл поврежден или не поддерживаемый формат")
             #для консоли
             print(self.dropped_file)
             
@@ -112,21 +131,3 @@ class ImageToImage(tk.Frame): #фрейм класс
         self.label_drop.drop_target_register(DND_FILES)
         # Привязываем обработчик `DandD` к событию "<<Drop>>", которое возникает, когда пользователь отпускает файл на виджет
         self.label_drop.dnd_bind("<<Drop>>", DandD)
-
-"""
-def load_file():
-    file_path = filedialog.askopenfilename()
-
-aup = tk.Button(self, text="Выбрать и загрузить файл", command=load_file) # видже для кнопки загрузки пути
-aup.place(x=100, y=20, width=200, height=50)
-"""
-"""
-#создаем папку на рабочем столе если её нету
-def desktop_folder():
-    desktop_path = os.pardir.join(os.path.expanduser("~"), "home")
-    folder_name = "Все конвертированые картинки"
-    new_folder_path = os.path.join(desktop_path, folder_name)
-    if not os.path.exists(new_folder_path):
-        os.makedirs(new_folder_path)        
-
-desktop_folder()"""

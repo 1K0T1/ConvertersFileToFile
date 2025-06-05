@@ -2,7 +2,7 @@ from PIL import Image, ImageFilter, ImageFont, ImageDraw, ImageEnhance, ImageOps
 import tkinter as tk                                                                         #модули и библиотеки
 from tkinter import ttk, filedialog                                                          #модули и библиотеки
 from tkinterdnd2 import DND_FILES, TkinterDnD                                                #модули и библиотеки
-import os                                                                                    #модули и библиотеки
+from pathlib import Path                                                                     #модули и библиотеки
 from start_choice import StartWindow                                                         #импорт класса скрипта начала
 from converter_image_to_image import ImageToImage                                            #импорт класса скрипта конвертера форматов картинок
 from sound_converter import SoundConverter                                                   #импорт класса скрипта конвертера форматов звуков

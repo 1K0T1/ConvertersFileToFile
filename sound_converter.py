@@ -60,7 +60,7 @@ class SoundConverter(tk.Frame): #фрейм класс
                 #Убераем каждые 5 сек
                 self.after(5000, lambda: self.label_error.config(text=""))
 
-        def DandD(event): #функция работае тогда когда файл переташили
+        def DandD(event): #функция работае тогда когда файл перетащили
             self.dropped_file = event.data.strip("{}")                # убираем фигурные скобки (если путь содержит пробелы)
             self.label_drop.config(text=f"Файл: {self.dropped_file}") # меняем text на путь к файлу
             try:
